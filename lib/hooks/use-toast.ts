@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode, createElement } from "react";
 
 type ToastType = "success" | "error" | "info" | "warning";
 
@@ -19,7 +19,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export function ToastProvider({ children }: { children: React.ReactNode }): React.ReactNode {
+export function ToastProvider({ children }: { children: ReactNode }): ReactNode {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {
@@ -34,10 +34,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }): Reac
     setTimeout(() => removeToast(id), 5000);
   }, [removeToast]);
 
-  return (
-    <ToastContext.Provider value={{ toast, toasts, removeToast }}>
-      {children}
-    </ToastContext.Provider>
+  return createElement(
+    ToastContext.Provider,
+    { value: { toast, toasts, removeToast } },
+    children
   );
 }
 
