@@ -1,0 +1,204 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { CreditCard, Search, Calendar, CheckCircle, Clock, Info, ShieldCheck, ArrowRight, Download } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/lib/hooks/use-toast";
+
+interface Payment {
+  id: string;
+  invoiceNumber: string;
+  amount: number;
+  status: string;
+  taxPeriod: string;
+  method?: string;
+  paidAt?: string;
+  createdAt: string;
+  user: { name: string; email: string };
+  taxObject: { nop: string; name: string; type: string };
+}
+
+function formatCurrency(val: number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
+}
+
+const statusColor: Record<string, string> = {
+  PAID: "bg-green-500/10 text-green-600 border-green-200",
+  PENDING: "bg-amber-500/10 text-amber-600 border-amber-200",
+  EXPIRED: "bg-red-500/10 text-red-600 border-red-200",
+};
+
+export default function AdminPaymentsPage() {
+  const { toast } = useToast();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+
+  useEffect(() => {
+    fetch("/api/admin/payments")
+      .then((r) => r.json())
+      .then((d) => setPayments(d.payments ?? []))
+      .catch(() => toast("Gagal", "Tidak dapat memuat data transaksi", "error"))
+      .finally(() => setLoading(false));
+  }, [toast]);
+
+  const filtered = payments.filter((p) => {
+    const matchSearch =
+      p.invoiceNumber?.toLowerCase().includes(search.toLowerCase()) ||
+      p.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      p.taxObject?.nop?.includes(search);
+    const matchStatus = filterStatus === "ALL" || p.status === filterStatus;
+    return matchSearch && matchStatus;
+  });
+
+  const totalAmount = filtered.filter(p => p.status === "PAID").reduce((a, b) => a + b.amount, 0);
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+          <p className="text-primary font-black uppercase tracking-[0.2em] text-xs">Penerimaan Daerah</p>
+          <h1 className="text-4xl font-black tracking-tighter mt-2 flex items-center gap-4">
+            <CreditCard className="w-12 h-12 text-primary rotate-[-10deg]" /> Monitoring Transaksi
+          </h1>
+          <p className="text-muted-foreground mt-2 font-medium">Pengawasan pembayaran Pajak Daerah Kota Medan secara real-time dan terintegrasi.</p>
+        </div>
+        <div className="flex gap-4">
+           <Button variant="outline" size="lg" className="gap-2 group overflow-hidden relative">
+              <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" /> Ekspor Laporan Excel
+           </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <SummaryCard label="Total Penerimaan" value={formatCurrency(totalAmount)} icon={<ShieldCheck />} color="green" />
+        <SummaryCard label="Menunggu Bayar" value={filtered.filter(p => p.status === "PENDING").length.toString()} icon={<Clock />} color="amber" />
+        <SummaryCard label="Transaksi PAID" value={filtered.filter(p => p.status === "PAID").length.toString()} icon={<CheckCircle />} color="blue" />
+        <SummaryCard label="Item Terdata" value={filtered.length.toString()} icon={<Info />} color="zinc" />
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="relative group flex-1">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 group-focus-within:text-primary transition-colors" />
+          <input
+            type="text"
+            placeholder="Cari berdasarkan Nomor Invoice, NOP, atau Nama Wajib Pajak..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-14 pr-6 py-4 bg-white border border-border/50 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold shadow-sm shadow-inner"
+          />
+        </div>
+        
+        <div className="flex gap-2 p-1.5 bg-zinc-50 rounded-2xl border border-border/50 shadow-inner">
+          {["ALL", "PAID", "PENDING", "EXPIRED"].map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilterStatus(s)}
+              className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                filterStatus === s 
+                  ? "bg-white text-primary shadow-sm border border-primary/10" 
+                  : "text-zinc-500 hover:text-zinc-900"
+              }`}
+            >
+              {s === "ALL" ? "Semua" : s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Card padding="none" variant="outline" className="shadow-2xl shadow-black/5 overflow-hidden border-border/50">
+        <div className="overflow-x-auto">
+          {loading ? (
+             <div className="p-8 space-y-6">
+                {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 rounded-2xl w-full" />)}
+             </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-zinc-50 border-b border-border/50">
+                  <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-500">Invoice / Wajib Pajak</th>
+                  <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-500">Objek Pajak</th>
+                  <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-500">Jumlah</th>
+                  <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-500">Status</th>
+                  <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-500">Tgl Transaksi</th>
+                  <th className="px-8 py-6 text-right text-xs font-black uppercase tracking-widest text-zinc-500">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={6} className="px-8 py-20 text-center font-black text-zinc-400">Tidak ada riwayat transaksi ditemukan.</td></tr>
+                ) : (
+                  filtered.map((p) => (
+                    <tr key={p.id} className="group hover:bg-zinc-50 transition-all font-bold text-zinc-900">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-mono tracking-tight text-primary">{p.invoiceNumber}</span>
+                          <span className="text-xs text-zinc-500 font-medium group-hover:text-foreground transition-colors mt-1">{p.user?.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                         <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-zinc-50 text-[10px] uppercase font-black tracking-widest rounded-lg border border-border/50">{p.taxObject.type}</span>
+                            <span className="text-xs truncate max-w-[150px]">{p.taxObject.name}</span>
+                         </div>
+                      </td>
+                      <td className="px-8 py-6">
+                         <span className="text-sm text-amber-600 font-black tracking-tight">{formatCurrency(p.amount)}</span>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${statusColor[p.status] || "bg-zinc-100"}`}>
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6">
+                         <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-xs text-zinc-500 font-bold">
+                               <Calendar className="w-3.5 h-3.5" /> {new Date(p.createdAt).toLocaleDateString("id-ID")}
+                            </div>
+                            {p.paidAt && (
+                               <div className="flex items-center gap-2 text-[10px] text-green-600 uppercase font-black">
+                                  <CheckCircle className="w-3.5 h-3.5 font-bold" /> PAID {new Date(p.paidAt).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
+                               </div>
+                            )}
+                         </div>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                         <Button variant="ghost" size="icon" className="hover:text-primary"><ArrowRight className="w-4 h-4" /></Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, icon, color }: { label: string; value: string; icon: React.ReactNode; color: string }) {
+  const colors: Record<string, string> = {
+    green: "bg-green-500/10 text-green-600 border-green-200 shadow-green-500/10",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-200 shadow-amber-500/10",
+    blue: "bg-blue-500/10 text-blue-600 border-blue-200 shadow-blue-500/10",
+    zinc: "bg-zinc-500/10 text-zinc-600 border-zinc-200 shadow-zinc-500/10",
+  };
+
+  return (
+    <Card padding="md" variant="elevated" className={colors[color]}>
+      <div className="flex items-center gap-5">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-current/20 bg-white/50 shadow-inner">
+           {icon}
+        </div>
+        <div>
+           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">{label}</p>
+           <p className="text-2xl font-black tracking-tight leading-none tabular-nums truncate max-w-[150px]">{value}</p>
+        </div>
+      </div>
+    </Card>
+  );
+}

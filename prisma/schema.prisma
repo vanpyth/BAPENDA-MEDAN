@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  OFFICER
+  MAHASISWA
+  DEVELOPER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(USER)
+  nik           String?   @unique
+  phone         String?
+  address       String?
+  ktpUrl        String?   // URL foto KTP
+  institution   String?   // Untuk mahasiswa: nama universitas
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  taxObjects       TaxObject[]
+  payments         Payment[]
+  auditLogs        AuditLog[]
+  researchRequests ResearchRequest[]
+  ppidRequests     PPIDRequest[]
+  complaints       Complaint[]
+  news             News[]
+  articles         Article[]
+  announcements    Announcement[]
+  notifications    Notification[]
+}
+
+// ... existing models ...
+
+// ─── Notifikasi ─────────────────────────────────────────────────────────────
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String   @db.Text
+  type      String   // INFO, SUCCESS, WARNING, ERROR
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Pajak ────────────────────────────────────────────────────────────────────
+model TaxObject {
+  id         String   @id @default(cuid())
+  nop        String   @unique // Nomor Objek Pajak
+  type       String   // PBB, BPHTB, PKB, etc.
+  name       String
+  address    String
+  luasTanah  Float?
+  luasBangun Float?
+  njop       Decimal? @db.Decimal(20, 2)
+  njoptkp    Decimal? @db.Decimal(20, 2) // Nilai Jual Objek Tidak Kena Pajak
+  status     String   @default("ACTIVE")
+  lat        Float?
+  lng        Float?
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  payments Payment[]
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique
+  amount        Decimal   @db.Decimal(20, 2)
+  taxPeriod     String    // e.g. "2025"
+  status        String    // PENDING, PAID, CANCELLED, EXPIRED
+  method        String?   // VA_BRI, VA_BNI, QRIS, BANK_TRANSFER
+  paidAt        DateTime?
+  expiredAt     DateTime
+  notes         String?
+  taxObjectId   String
+  taxObject     TaxObject @relation(fields: [taxObjectId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ─── Content Management System (CMS) ───────────────────────────────────────
+model News {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  summary   String   @db.Text
+  content   String   @db.Text
+  image     String?
+  category  String
+  isActive  Boolean  @default(true)
+  viewCount Int      @default(0)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  summary   String   @db.Text
+  content   String   @db.Text
+  image     String?
+  isActive  Boolean  @default(true)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   @db.Text
+  category  String
+  image     String?
+  isActive  Boolean  @default(true)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  table     String
+  recordId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  oldValue  Json?
+  newValue  Json?
+  createdAt DateTime @default(now())
+}
+
+// ─── Pengajuan Riset Mahasiswa ────────────────────────────────────────────────
+model ResearchRequest {
+  id             String    @id @default(cuid())
+  requestNumber  String    @unique // e.g. "RES-20260001"
+  title          String
+  description    String    @db.Text
+  institution    String    // Nama universitas/lembaga
+  supervisorName String    // Nama dosen pembimbing
+  supervisorNip  String?   // NIP dosen
+  dataNeeded     String    @db.Text // Data yang dibutuhkan
+  purpose        String    @db.Text // Tujuan penelitian
+  documentUrl    String?   // Surat pengantar (URL/filename)
+  status         String    @default("PENDING") // PENDING, REVIEW, APPROVED, REJECTED
+  reviewNotes    String?   @db.Text
+  reviewedBy     String?   // Admin/Officer userId
+  reviewedAt     DateTime?
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// ─── Permohonan Informasi Publik (PPID) ──────────────────────────────────────
+model PPIDRequest {
+  id              String    @id @default(cuid())
+  ticketNumber    String    @unique // e.g. "PPID-20260001"
+  title           String
+  description     String    @db.Text
+  informationType String    // DOKUMEN, DATA_STATISTIK, KEBIJAKAN, ANGGARAN, LAINNYA
+  urgency         String    @default("NORMAL") // NORMAL, URGENT
+  status          String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, REJECTED, CLOSED
+  response        String?   @db.Text
+  responseAt      DateTime?
+  respondedBy     String?
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ─── Pengaduan Masyarakat ─────────────────────────────────────────────────────
+model Complaint {
+  id           String    @id @default(cuid())
+  ticketNumber String    @unique // e.g. "ADU-20260001"
+  subject      String
+  description  String    @db.Text
+  category     String    // PELAYANAN, TEKNIS_SISTEM, PAJAK, PETUGAS, LAINNYA
+  priority     String    @default("NORMAL") // LOW, NORMAL, HIGH
+  status       String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  response     String?   @db.Text
+  responseAt   DateTime?
+  respondedBy  String?
+  isAnonymous  Boolean   @default(false)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
