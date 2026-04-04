@@ -4,18 +4,19 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { AuditService } from "@/lib/services/audit";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { title, content, category, isActive } = await req.json();
-    const oldVal = await prisma.announcement.findUnique({ where: { id: params.id } });
+    const oldVal = await prisma.announcement.findUnique({ where: { id: id } });
 
     const updated = await prisma.announcement.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         title,
         content,
@@ -41,15 +42,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const deleted = await prisma.announcement.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     await AuditService.log({

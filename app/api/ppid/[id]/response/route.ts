@@ -5,8 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { AuditService } from "@/lib/services/audit";
 import { NotificationService } from "@/lib/services/notification";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !["ADMIN", "OFFICER"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,9 +18,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Respon tidak boleh kosong" }, { status: 400 });
     }
 
-    const oldVal = await prisma.pPIDRequest.findUnique({ where: { id: params.id } });
+    const oldVal = await prisma.pPIDRequest.findUnique({ where: { id: id } });
     const updated = await prisma.pPIDRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         response,
         responseAt: new Date(),
