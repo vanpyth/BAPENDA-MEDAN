@@ -112,37 +112,33 @@ export default function LoginPage() {
 
                <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="space-y-8">
-                     <div className="space-y-4 group">
-                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 pl-4">Kredensial Email</label>
-                        <div className="relative font-bold group">
-                           <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 group-focus-within:text-primary transition-colors" />
-                           <input
-                              type="email"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              placeholder="administrator@medan.go.id"
-                              required
-                              className="w-full pl-16 pr-8 h-16 bg-zinc-50 border border-zinc-200 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-black text-sm shadow-inner"
-                           />
-                        </div>
-                     </div>
-                     <div className="space-y-4 group">
-                        <div className="flex items-center justify-between px-4">
-                           <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Kata Sandi</label>
-                           <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline italic">Lupa Sandi?</Link>
-                        </div>
-                        <div className="relative font-bold group">
-                           <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 group-focus-within:text-primary transition-colors" />
-                           <input
-                              type="password"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              placeholder="••••••••••••"
-                              required
-                              className="w-full pl-16 pr-8 h-16 bg-zinc-50 border border-zinc-200 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-black text-sm tracking-widest shadow-inner"
-                           />
-                        </div>
-                     </div>
+                      <div className="space-y-4 group">
+                         <div className="relative font-bold group">
+                            <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 group-focus-within:text-primary transition-colors" />
+                            <input
+                               type="email"
+                               value={email}
+                               onChange={(e) => setEmail(e.target.value)}
+                               placeholder="Email atau Username"
+                               required
+                               className="w-full pl-16 pr-8 h-16 bg-zinc-50 border border-zinc-200 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-black text-sm shadow-inner"
+                            />
+                         </div>
+                      </div>
+                      <div className="space-y-4 group">
+                         <div className="relative font-bold group">
+                            <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 group-focus-within:text-primary transition-colors" />
+                            <input
+                               type="password"
+                               value={password}
+                               onChange={(e) => setPassword(e.target.value)}
+                               placeholder="Kata Sandi"
+                               required
+                               className="w-full pl-16 pr-8 h-16 bg-zinc-50 border border-zinc-200 rounded-[1.5rem] focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-black text-sm tracking-widest shadow-inner"
+                            />
+                            <Link href="#" className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline italic z-10">Lupa Sandi?</Link>
+                         </div>
+                      </div>
                   </div>
 
                   {error && (

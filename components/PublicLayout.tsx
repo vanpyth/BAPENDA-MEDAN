@@ -63,15 +63,34 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                </div>
             </div>
             <div className="space-y-6">
-               <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Hubungi Kami</h5>
-               <ul className="space-y-4 text-sm font-bold">
-                  {["Pusat Bantuan", "Aduan Publik", "WhatsApp Gateway", "PPID"].map(l => <li key={l}><Link href="#" className="hover:text-primary transition-all hover:translate-x-2 inline-block font-black uppercase text-[10px] tracking-widest">{l}</Link></li>)}
+               <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary italic">Layanan Digital</h5>
+               <ul className="space-y-4">
+                  {[
+                    { l: "Pajak Daerah", h: "/pajak-daerah" },
+                    { l: "PPID Digital", h: "/dashboard/ppid" },
+                    { l: "E-Pengaduan", h: "/dashboard/pengaduan" },
+                    { l: "Hitung Pajak", h: "/dashboard/pajak/hitung" },
+                    { l: "Simulasi", h: "/dashboard/pajak/simulasi" }
+                  ].map(item => (
+                    <li key={item.l}>
+                      <Link href={item.h} className="hover:text-primary transition-all hover:translate-x-2 inline-block font-black uppercase text-[9px] tracking-widest text-muted-foreground">{item.l}</Link>
+                    </li>
+                  ))}
                </ul>
             </div>
             <div className="space-y-6">
-               <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Media Sosial</h5>
-               <ul className="space-y-4 text-sm font-bold">
-                  {["Instagram", "Twitter", "Facebook", "Youtube"].map(l => <li key={l}><Link href="#" className="hover:text-primary transition-all hover:translate-x-2 inline-block font-black uppercase text-[10px] tracking-widest">{l}</Link></li>)}
+               <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary italic">Kontak & Bantuan</h5>
+               <ul className="space-y-4">
+                  {[
+                    { l: "Pusat Bantuan", h: "/informasi" },
+                    { l: "Lokasi Kantor", h: "#map" },
+                    { l: "WhatsApp Support", h: "https://wa.me/6281234567890" },
+                    { l: "Email Resmi", h: "mailto:bapenda@medan.go.id" }
+                  ].map(item => (
+                    <li key={item.l}>
+                      <Link href={item.h} className="hover:text-primary transition-all hover:translate-x-2 inline-block font-black uppercase text-[9px] tracking-widest text-muted-foreground">{item.l}</Link>
+                    </li>
+                  ))}
                </ul>
             </div>
          </div>

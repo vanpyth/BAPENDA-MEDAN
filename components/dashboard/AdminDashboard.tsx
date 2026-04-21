@@ -12,11 +12,20 @@ import {
   ArrowRight,
   ShieldAlert,
   Loader2,
-  Bell
+  Bell,
+  PieChart,
+  Database,
+  Layers,
+  FileSearch,
+  History,
+  MessageSquare,
+  Settings
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { PremiumChart } from "@/components/ui/PremiumChart";
 
 interface DashboardData {
   stats: {
@@ -107,6 +116,55 @@ export const AdminDashboard = ({ session }: { session: Session }) => {
                      <stat.icon className="w-7 h-7" />
                   </div>
                </Card>
+            ))}
+         </div>
+      </section>
+
+      {/* ── Revenue Intelligence Chart ── */}
+      <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000">
+         <Card padding="lg" variant="elevated" className="bg-white border-zinc-100 rounded-[5rem] shadow-2xl shadow-primary/5 p-16 md:p-24 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] -z-10 group-hover:scale-110 transition-transform duration-[2000ms]" />
+            <PremiumChart 
+               subtitle="Fiskal Performance Index"
+               title="Penerimaan Pajak Mingguan"
+               data={[
+                  { label: "Senin", value: 1250000000 },
+                  { label: "Selasa", value: 1450000000 },
+                  { label: "Rabu", value: 1100000000 },
+                  { label: "Kamis", value: 1800000000 },
+                  { label: "Jumat", value: 2100000000 },
+                  { label: "Sabtu", value: 850000000 },
+                  { label: "Minggu", value: 450000000 },
+               ]}
+            />
+         </Card>
+      </section>
+
+      {/* ── Control Terminal (Hidden Features Unveiled) ── */}
+      <section className="animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
+         <div className="flex items-center gap-4 mb-10 pl-4">
+            <div className="w-12 h-1 bg-primary rounded-full" />
+            <h2 className="text-2xl font-black italic tracking-tighter uppercase italic">Terminal <span className="text-primary">Kendali.</span></h2>
+         </div>
+         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {[
+               { label: "Data Wajib Pajak", icon: Users, href: "/dashboard/admin/users", bg: "bg-blue-50/50", color: "text-blue-600" },
+               { label: "Audit Ledger", icon: Database, href: "/dashboard/admin/audit", bg: "bg-zinc-50", color: "text-zinc-600" },
+               { label: "CMS Konten", icon: Layers, href: "/dashboard/admin/cms", bg: "bg-emerald-50/50", color: "text-emerald-600" },
+               { label: "Monitoring Tax", icon: PieChart, href: "/dashboard/admin/stats", bg: "bg-primary/5", color: "text-primary" },
+               { label: "Riset & Data", icon: FileSearch, href: "/dashboard/admin/research", bg: "bg-amber-50/50", color: "text-amber-600" },
+               { label: "Log Transaksi", icon: History, href: "/dashboard/admin/payments", bg: "bg-rose-50/50", color: "text-rose-600" },
+               { label: "Pusat Bantuan", icon: MessageSquare, href: "/dashboard/admin/notifications", bg: "bg-indigo-50/50", color: "text-indigo-600" },
+               { label: "Setelan Sistem", icon: Settings, href: "/dashboard/admin/settings", bg: "bg-zinc-100", color: "text-zinc-400" },
+            ].map((item, i) => (
+               <Link key={i} href={item.href}>
+                  <Card padding="lg" className="group h-44 bg-white border-zinc-100/50 hover:border-primary/20 hover:scale-[1.05] transition-all duration-500 rounded-[3rem] shadow-xl shadow-primary/[0.03] flex flex-col items-center justify-center gap-4 text-center">
+                     <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform", item.bg, item.color)}>
+                        <item.icon className="w-6 h-6" />
+                     </div>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-primary transition-colors italic px-2">{item.label}</span>
+                  </Card>
+               </Link>
             ))}
          </div>
       </section>

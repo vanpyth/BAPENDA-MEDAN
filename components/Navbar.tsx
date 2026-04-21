@@ -68,7 +68,7 @@ export function Navbar() {
           
           <Link
             href="/login"
-            className="hidden sm:flex items-center gap-3 px-10 py-4 bg-primary text-white font-black rounded-full hover:shadow-2xl hover:shadow-primary/30 transition-all active:scale-95 group relative overflow-hidden btn-premium uppercase text-[10px] tracking-widest italic"
+            className="hidden sm:flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground font-black rounded-full hover:shadow-2xl hover:shadow-secondary/30 transition-all active:scale-95 group relative overflow-hidden btn-premium uppercase text-[10px] tracking-widest italic"
           >
             <div className="relative z-10 flex items-center gap-3">
                <User className="w-4 h-4 group-hover:rotate-12 transition-transform" />

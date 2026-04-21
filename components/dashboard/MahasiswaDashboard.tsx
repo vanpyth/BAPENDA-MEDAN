@@ -17,6 +17,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { PremiumChart } from "@/components/ui/PremiumChart";
 
 interface ResearchApplication {
    id: string;
@@ -152,6 +153,25 @@ export const MahasiswaDashboard = ({ session }: { session: Session }) => {
                </div>
             </Card>
          </div>
+
+         {/* ── Research Activity Chart ── */}
+         <section>
+            <Card padding="lg" variant="elevated" className="bg-white border-zinc-100 rounded-[5rem] shadow-2xl shadow-primary/5 p-16 md:p-24 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] -z-10 group-hover:scale-110 transition-transform duration-[2000ms]" />
+               <PremiumChart 
+                  subtitle="Academic Engagement Index"
+                  title="Aktivitas Riset Per Bulan"
+                  data={[
+                     { label: "Jan", value: 12 },
+                     { label: "Feb", value: 18 },
+                     { label: "Mar", value: 15 },
+                     { label: "Apr", value: 25 },
+                     { label: "Mei", value: 20 },
+                     { label: "Jun", value: 30 },
+                  ]}
+               />
+            </Card>
+         </section>
 
          {/* ── Status Registry ── */}
          <section className="grid grid-cols-1 lg:grid-cols-12 gap-10">

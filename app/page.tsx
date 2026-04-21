@@ -9,11 +9,17 @@ import {
   ArrowRight, CreditCard, 
   Search, Globe, Zap, 
   Building2,
-  Loader2
+  Loader2,
+  Calculator,
+  Bell,
+  Megaphone,
+  MapPin,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useToast } from "@/lib/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface NewsItem {
   id: string;
@@ -107,7 +113,7 @@ export default function Home() {
               />
            </form>
            <Link href={portalLink}>
-              <Button variant="primary" size="lg" className="btn-premium px-10 rounded-full text-xs font-black uppercase tracking-widest h-14">
+              <Button variant="secondary" size="lg" className="btn-premium px-10 rounded-full text-xs font-black uppercase tracking-widest h-14">
                 {session ? "Buka Dashboard" : "Masuk Portal"}
               </Button>
            </Link>
@@ -134,19 +140,83 @@ export default function Home() {
                Integrasi pendapatan daerah dalam satu ekosistem digital yang cerdas, transparan, dan akuntabel.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6 pt-10">
-               <Link href={portalLink}>
-                  <Button size="xl" className="btn-premium px-12 rounded-[2rem] gap-4 text-sm font-black uppercase tracking-widest h-20 shadow-2xl">
-                     Mulai Pelayanan <ArrowRight className="w-5 h-5" />
+            <div className="flex flex-wrap gap-6 pt-10">
+               <Link href="#cek-pajak">
+                  <Button size="xl" className="btn-premium px-12 h-20 rounded-full font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/30 group">
+                     Cek Tagihan Anda <ArrowRight className="ml-4 w-5 h-5 group-hover:translate-x-2 transition-transform" />
                   </Button>
                </Link>
-               <Link href="/informasi">
-                <Button variant="outline" size="xl" className="px-12 rounded-[2rem] gap-4 text-sm font-black uppercase tracking-widest h-20 border-zinc-200 hover:bg-zinc-50 bg-white">
-                    Pusat Informasi <Zap className="w-5 h-5 text-primary" />
-                </Button>
+               <Link href="/login">
+                  <Button variant="outline" size="xl" className="px-12 h-20 rounded-full border-zinc-200 bg-white/50 backdrop-blur-md font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-white transition-all">
+                     Bayar Sekarang <CreditCard className="ml-4 w-5 h-5 text-primary" />
+                  </Button>
                </Link>
             </div>
          </div>
+      </section>
+
+      {/* ── Quick Access Hub ── */}
+      <section className="container mx-auto px-6 -mt-16 relative z-30">
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            {[
+               { label: "Kalkulator Pajak", icon: Calculator, href: "/dashboard/pajak/hitung", color: "text-blue-500", bg: "bg-blue-50" },
+               { label: "Layanan PPID", icon: Bell, href: "/dashboard/ppid", color: "text-emerald-500", bg: "bg-emerald-50" },
+               { label: "E-Pengaduan", icon: Megaphone, href: "/dashboard/pengaduan", color: "text-rose-500", bg: "bg-rose-50" },
+               { label: "Cari Lokasi", icon: MapPin, href: "#map", color: "text-amber-500", bg: "bg-amber-50" }
+            ].map((item, i) => (
+               <Link key={i} href={item.href}>
+                  <Card padding="none" className="group h-40 md:h-56 bg-white/80 backdrop-blur-xl border-zinc-100/50 hover:border-primary/20 hover:scale-[1.05] transition-all duration-500 rounded-[3rem] shadow-2xl shadow-primary/5 flex flex-col items-center justify-center gap-4 text-center overflow-hidden relative">
+                     <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-white to-zinc-50")} />
+                     <div className={cn("w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-[2rem] flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform relative z-10", item.bg, item.color)}>
+                        <item.icon className="w-6 h-6 md:w-10 md:h-10" />
+                     </div>
+                     <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-500 group-hover:text-primary transition-colors relative z-10 italic px-4 leading-tight">{item.label}</span>
+                  </Card>
+               </Link>
+            ))}
+         </div>
+      </section>
+
+      {/* ── Quick Tax Lookup Widget ── */}
+      <section id="cek-pajak" className="container mx-auto px-6 py-20">
+         <Card padding="none" variant="elevated" className="bg-white border-zinc-100 rounded-[4rem] shadow-2xl shadow-primary/10 overflow-hidden group">
+            <div className="flex flex-col lg:flex-row">
+               <div className="lg:w-1/3 bg-primary p-12 lg:p-20 text-white space-y-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+                     <Search className="w-32 h-32" />
+                  </div>
+                  <div className="relative z-10 space-y-4">
+                     <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase italic leading-none">Cek Pajak <br/><span className="text-white/60">Cepat.</span></h2>
+                     <p className="text-sm font-medium italic text-white/70 leading-relaxed border-l-2 border-white/20 pl-6 cursor-default">Masukkan Nomor Objek Pajak (NOP) Anda untuk melihat status tagihan aktif secara instan.</p>
+                  </div>
+               </div>
+               <div className="flex-1 p-12 lg:p-20 flex flex-col justify-center">
+                  <div className="flex flex-col md:flex-row gap-6">
+                     <div className="flex-1 relative group/input">
+                        <Search className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-zinc-300 group-focus-within/input:text-primary transition-all" />
+                        <input 
+                           type="text" 
+                           placeholder="Masukkan 18 Digit NOP Anda..." 
+                           className="w-full pl-20 pr-8 h-20 bg-zinc-50 border border-zinc-100 rounded-[2rem] focus:ring-4 focus:ring-primary/10 outline-none transition-all font-black text-xs uppercase tracking-widest italic"
+                        />
+                     </div>
+                     <Button size="xl" className="h-20 px-12 rounded-[2rem] btn-premium font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20">
+                        Periksa Tagihan
+                     </Button>
+                  </div>
+                  <div className="mt-8 flex items-center gap-8 pl-4 opacity-40">
+                     <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] font-black uppercase tracking-widest italic">Data Terenkripsi</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest italic">Hasil Seketika</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </Card>
       </section>
 
       {/* ── Latest News Section (Dynamic CMS) ── */}
@@ -194,36 +264,51 @@ export default function Home() {
       </section>
 
       {/* ── Services Section ── */}
-      <section className="container mx-auto px-6 py-32 space-y-20">
-         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="space-y-4">
-               <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.5em] italic">Specialized Services</h3>
-               <h2 className="text-5xl md:text-6xl font-black italic tracking-tighter leading-none italic uppercase">Akses Layanan <br /> <span className="text-primary italic">Tanpa Batas.</span></h2>
+      <section className="container mx-auto px-6 py-40 space-y-24">
+         <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+            <div className="space-y-6">
+               <div className="flex items-center gap-3 text-primary">
+                  <div className="w-12 h-1 bg-primary rounded-full shadow-glow" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em] italic leading-none">Specialized Service Node</p>
+               </div>
+               <h2 className="text-5xl md:text-7xl font-black italic tracking-tighter leading-none italic uppercase">Akses Layanan <br /> <span className="text-primary italic underline decoration-primary/10 decoration-8 underline-offset-8">Tanpa Batas.</span></h2>
             </div>
             <Link href="/layanan">
-               <Button variant="ghost" className="gap-2 font-black uppercase text-[10px] tracking-[0.3em] h-14 px-8 border-zinc-100 border-b-2 hover:border-primary transition-all italic">Katalog Layanan →</Button>
+               <Button variant="ghost" className="gap-4 font-black uppercase text-xs tracking-[0.3em] h-20 px-12 border-zinc-100 border-2 hover:border-primary hover:bg-white transition-all shadow-xl shadow-primary/5 italic rounded-[2rem]">
+                  Katalog Layanan <ArrowRight className="w-5 h-5 text-primary" />
+               </Button>
             </Link>
          </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
-               { title: "Manajemen PBB-P2", desc: "Cek tagihan, cetak SPPT digital, dan riwayat pembayaran PBB dalam satu portal identitas.", icon: Building2, href: "/dashboard/pajak/objek" },
-               { title: "Sistem BPHTB Online", desc: "Validasi bea perolehan hak atas tanah dan bangunan yang terintegrasi langsung dengan BPN.", icon: CreditCard, href: "/dashboard/pajak/tagihan" },
-               { title: "Monitoring Pajak Daerah", desc: "Pelaporan omzet pajak hotel, restoran, hiburan, dan reklame secara real-time dan transparan.", icon: Globe, href: "/dashboard" },
+               { title: "Manajemen PBB-P2", desc: "Cek tagihan, cetak SPPT digital, dan riwayat pembayaran PBB dalam satu portal identitas.", icon: Building2, href: "/dashboard/pajak/objek", color: "from-blue-500/20 to-indigo-500/0" },
+               { title: "Sistem BPHTB Online", desc: "Validasi bea perolehan hak atas tanah dan bangunan yang terintegrasi langsung dengan BPN.", icon: CreditCard, href: "/dashboard/pajak/tagihan", color: "from-amber-500/20 to-orange-500/0" },
+               { title: "Monitoring Pajak Daerah", desc: "Pelaporan omzet pajak hotel, restoran, hiburan, dan reklame secara real-time dan transparan.", icon: Globe, href: "/dashboard", color: "from-emerald-500/20 to-teal-500/0" },
             ].map((s, i) => (
-               <Card key={i} padding="xl" variant="elevated" className="group h-[420px] bg-white border-zinc-50 hover:scale-[1.03] transition-all flex flex-col justify-between shadow-2xl shadow-primary/10 rounded-[4rem] p-12 text-left">
-                  <div className="w-24 h-24 bg-zinc-50 rounded-[2.5rem] flex items-center justify-center text-primary border border-zinc-100 group-hover:rotate-12 transition-all shadow-inner">
-                     <s.icon className="w-12 h-12" />
+               <Card key={i} padding="none" variant="elevated" className="group h-[500px] bg-white border-zinc-100 hover:scale-[1.03] transition-all duration-500 flex flex-col shadow-2xl shadow-primary/5 rounded-[4.5rem] overflow-hidden relative text-left">
+                  <div className={cn("absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-700", s.color)} />
+                  
+                  <div className="p-14 h-full flex flex-col justify-between relative z-10">
+                     <div className="space-y-10">
+                        <div className="w-28 h-28 bg-zinc-50 rounded-[2.5rem] flex items-center justify-center text-primary border border-zinc-100 group-hover:rotate-12 group-hover:bg-white group-hover:shadow-2xl transition-all duration-500 shadow-inner">
+                           <s.icon className="w-14 h-14" />
+                        </div>
+                        <div className="space-y-6">
+                           <h4 className="text-3xl font-black italic tracking-tight leading-none uppercase italic text-foreground group-hover:text-primary transition-colors">{s.title}</h4>
+                           <p className="text-muted-foreground font-medium leading-relaxed italic border-l-4 border-primary/20 pl-8 cursor-default">&quot;{s.desc}&quot;</p>
+                        </div>
+                     </div>
+                     
+                     <Link href={session ? s.href : "/login"} className="w-fit">
+                        <Button variant="primary" size="icon" className={cn(
+                           "w-20 h-20 rounded-full rotate-45 hover:rotate-90 transition-all duration-500 btn-premium shadow-2xl",
+                           i === 1 ? "bg-secondary shadow-secondary/30" : "shadow-primary/30"
+                        )}>
+                           <ArrowRight className="w-10 h-10" />
+                        </Button>
+                     </Link>
                   </div>
-                  <div className="space-y-6">
-                     <h4 className="text-3xl font-black italic tracking-tight leading-none uppercase italic text-foreground group-hover:text-primary transition-colors">{s.title}</h4>
-                     <p className="text-muted-foreground font-medium leading-relaxed italic border-l-4 border-primary/20 pl-8 cursor-default">&quot;{s.desc}&quot;</p>
-                  </div>
-                  <Link href={session ? s.href : "/login"}>
-                    <Button variant="primary" size="icon" className="w-16 h-16 rounded-full rotate-45 hover:rotate-90 transition-transform btn-premium">
-                        <ArrowRight className="w-8 h-8" />
-                    </Button>
-                  </Link>
                </Card>
             ))}
          </div>

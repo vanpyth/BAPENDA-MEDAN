@@ -1,11 +1,11 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Jost, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jost = Jost({
+  variable: "--font-jost",
   subsets: ["latin"],
 });
 
@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 import { constructMetadata } from "@/lib/metadata";
+import { StickyBottomNav } from "@/components/StickyBottomNav";
+import { AccessibilityWidget } from "@/components/AccessibilityWidget";
+import { WhatsAppBubble } from "@/components/WhatsAppBubble";
 
 export const metadata = constructMetadata();
 
@@ -27,9 +30,14 @@ export default async function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${jost.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers session={session}>{children}</Providers>
+        <Providers session={session}>
+          {children}
+          <AccessibilityWidget />
+          <WhatsAppBubble />
+          <StickyBottomNav />
+        </Providers>
       </body>
     </html>
   );

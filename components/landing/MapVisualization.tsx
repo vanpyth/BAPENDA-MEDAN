@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 import type { MapContainerProps, TileLayerProps, MarkerProps, PopupProps, CircleProps } from "react-leaflet";
+import type { DivIcon } from "leaflet";
 
 // Dynamically import Leaflet components (SSR-safe) with proper typing
 const MapContainer = dynamic<MapContainerProps>(() => import("react-leaflet").then((mod) => mod.MapContainer), { 
@@ -34,11 +35,23 @@ export function MapVisualization() {
   const [data, setData] = useState<TaxPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<TaxPoint | null>(null);
+  const [customIcon, setCustomIcon] = useState<DivIcon | undefined>(undefined);
 
   // Center of Medan
   const center: [number, number] = [3.595, 98.672];
 
   useEffect(() => {
+    // Import Leaflet directly for Icon creation (Client-only)
+    import("leaflet").then((L) => {
+      const icon = L.divIcon({
+        className: "premium-marker",
+        html: `<div class="marker-pulse"></div><div class="marker-pin" style="background-color: var(--primary)"></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+      });
+      setCustomIcon(icon);
+    });
+
     fetch("/api/gis")
       .then((res) => res.json())
       .then((json) => {
@@ -79,31 +92,72 @@ export function MapVisualization() {
           background: #f8fafc !important;
         }
         .leaflet-popup-content-wrapper {
+          background: rgba(255, 255, 255, 0.8) !important;
+          backdrop-filter: blur(20px) !important;
           border-radius: 2rem !important;
-          padding: 12px !important;
-          box-shadow: 0 40px 60px -15px rgba(0, 0, 0, 0.1) !important;
-          border: 1px solid rgba(0,0,0,0.05);
+          padding: 8px !important;
+          box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.15) !important;
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
         }
         .leaflet-popup-tip-container {
           display: none;
         }
         .leaflet-control-zoom {
           border: none !important;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
-          border-radius: 1rem !important;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important;
+          border-radius: 1.5rem !important;
           margin: 2rem !important;
         }
         .leaflet-control-zoom-in, .leaflet-control-zoom-out {
           background: white !important;
-          color: black !important;
+          color: var(--primary) !important;
           border: 1px solid #f1f5f9 !important;
-          width: 44px !important;
-          height: 44px !important;
-          line-height: 44px !important;
-          font-weight: black !important;
+          width: 52px !important;
+          height: 52px !important;
+          line-height: 52px !important;
+          font-weight: 900 !important;
+          font-size: 18px !important;
+          transition: all 0.3s ease !important;
         }
-        .leaflet-control-zoom-in { border-radius: 1rem 1rem 0 0 !important; }
-        .leaflet-control-zoom-out { border-radius: 0 0 1rem 1rem !important; }
+        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+          background: var(--primary) !important;
+          color: white !important;
+        }
+        .leaflet-control-zoom-in { border-radius: 1.5rem 1.5rem 0 0 !important; }
+        .leaflet-control-zoom-out { border-radius: 0 0 1.5rem 1.5rem !important; }
+
+        /* ── Custom Premium Markers ── */
+        .premium-marker {
+          background: transparent;
+          border: none;
+        }
+        .marker-pin {
+          width: 20px;
+          height: 20px;
+          border-radius: 50% 50% 50% 0;
+          position: absolute;
+          transform: rotate(-45deg);
+          left: 50%;
+          top: 50%;
+          margin: -15px 0 0 -10px;
+          box-shadow: 0 0 20px rgba(37,99,235,0.5);
+          border: 3px solid white;
+        }
+        .marker-pulse {
+          position: absolute;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(37,99,235,0.2);
+          left: 50%;
+          top: 50%;
+          margin: -25px 0 0 -20px;
+          animation: marker-pulse-anim 2s infinite;
+        }
+        @keyframes marker-pulse-anim {
+          0% { transform: scale(0.5); opacity: 1; }
+          100% { transform: scale(2.5); opacity: 0; }
+        }
       `}</style>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 min-h-[700px]">
@@ -135,6 +189,7 @@ export function MapVisualization() {
                 <Marker 
                   key={point.id} 
                   position={[point.lat, point.lng]}
+                  icon={customIcon}
                   eventHandlers={{
                     click: () => setSelected(point),
                   }}
